@@ -45,22 +45,22 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
                 <TabsTrigger value="instructions"><ChefHat className="mr-2 h-4 w-4"/>Instructions</TabsTrigger>
             </TabsList>
             <TabsContent value="ingredients" className="py-6">
-                 <ul className="grid grid-cols-1 gap-x-6 gap-y-3 text-foreground sm:grid-cols-2">
+                 <ul className="grid grid-cols-1 gap-x-8 gap-y-3 text-foreground sm:grid-cols-2">
                   {recipe.ingredients.map((item, index) => (
-                    <li key={index} className="flex gap-2 items-start">
-                      <span className="font-semibold text-primary w-24 flex-shrink-0">{item.measure}</span>
+                    <li key={index} className="flex gap-3 items-start border-b border-dashed border-border/50 pb-2">
+                      <span className="font-semibold text-primary/90 w-28 flex-shrink-0">{item.measure}</span>
                       <span>{item.ingredient}</span>
                     </li>
                   ))}
                 </ul>
             </TabsContent>
             <TabsContent value="instructions" className="py-6">
-                <ol className="prose prose-sm max-w-none space-y-4 text-foreground">
+                <ol className="list-none space-y-6">
                   {recipe.instructions.map((step, index) => (
                      step.trim() && (
                         <li key={index} className="flex gap-4 items-start">
-                            <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-accent font-bold text-accent-foreground text-sm">{index + 1}</span>
-                            <p className="mt-0.5">{step}</p>
+                            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">{index + 1}</span>
+                            <p className="mt-1 flex-1 text-foreground/90">{step}</p>
                         </li>
                      )
                   ))}
