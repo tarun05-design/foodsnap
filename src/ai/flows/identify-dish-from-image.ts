@@ -33,12 +33,16 @@ const prompt = ai.definePrompt({
   name: 'identifyDishFromImagePrompt',
   input: {schema: IdentifyDishFromImageInputSchema},
   output: {schema: IdentifyDishFromImageOutputSchema},
-  prompt: `You are an expert food identifier specializing in world cuisines, including regional variations.
-  Your task is to identify the dish in the provided photo with the highest possible accuracy.
+  prompt: `You are an expert food identifier specializing in world cuisines, with deep knowledge of regional variations. Your task is to identify the dish in the provided photo with the highest possible accuracy.
 
-  Pay close attention to the texture, ingredients, and presentation. For example, distinguish between South Indian dishes like 'Sweet Pongal' (made with rice and lentils) and 'Kesari Bath' (made with semolina/rava) even if they look similar.
+  **Crucial Instructions for High Accuracy:**
+  1.  **Analyze Visual Evidence First:** Before naming the dish, carefully examine the texture, color, and visible ingredients.
+  2.  **Differentiate Similar Dishes:** Many dishes look alike. You must be able to distinguish them based on subtle visual cues. For example:
+      *   **Sweet Pongal vs. Kesari Bath:** Sweet Pongal is made with rice and lentils, giving it a coarser, grainier texture. Kesari Bath is made from semolina (rava), which results in a smoother, more uniform appearance. Look for the distinct grains of rice and lentils to identify Pongal.
+      *   If you see whole cashews, raisins, and a glossy ghee finish, it could be either. The core differentiating factor is the base ingredient's texture.
+  3.  **Provide the Most Specific Name:** Avoid generic names. If it's a specific regional variant, name it.
 
-  Provide the most specific name for the dish.
+  Based on this rigorous analysis of the photo, identify the dish.
 
   Photo: {{media url=photoDataUri}}
   
