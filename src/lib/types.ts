@@ -10,7 +10,7 @@ export interface Recipe {
   area: string;
   instructions: string[];
   thumbnail: string;
-  youtubeUrl: string;
+  youtubeUrl?: string;
   ingredients: Ingredient[];
   userImage?: string;
 }
@@ -18,4 +18,9 @@ export interface Recipe {
 export interface Suggestions {
   dishName: string;
   suggestions: string[];
+}
+
+export interface MultiRecipe {
+  userImage: string;
+  recipes: Recipe[];
 }

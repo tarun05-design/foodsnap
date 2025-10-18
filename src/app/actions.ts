@@ -3,13 +3,20 @@
 import { identifyDishFromImage } from "@/ai/flows/identify-dish-from-image";
 import { generateRecipeFromDishName } from "@/ai/flows/generate-recipe-from-dish-name";
 import { suggestRecipeOnApiFailure } from "@/ai/flows/suggest-recipe-on-api-failure";
-import type { Recipe, Suggestions } from "@/lib/types";
+import type { Recipe, Suggestions, MultiRecipe } from "@/lib/types";
 
 type RecipeState = {
   status: "recipe";
   data: Recipe;
   message?: never;
 };
+
+type MultiRecipeState = {
+  status: "multi-recipe";
+  data: MultiRecipe;
+  message?: never;
+};
+
 
 type SuggestionsState = {
   status: "suggestions";
@@ -40,6 +47,7 @@ export type AppState =
   | LoadingState
   | RecipeState
   | SuggestionsState
+  | MultiRecipeState
   | ErrorState;
 
 // Helper to transform TheMealDB API response to our Recipe type
@@ -66,6 +74,25 @@ const transformMealData = (meal: any, userImage?: string): Recipe => {
   };
 };
 
+const getRecipe = async (dishName: string): Promise<Recipe | null> => {
+  const recipeResponse = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(dishName)}`);
+  if (!recipeResponse.ok) {
+     // Do not throw, handle gracefully
+    console.error(`Failed to fetch from recipe API for ${dishName}.`);
+    return null;
+  }
+  
+  const recipeData = await recipeResponse.json();
+
+  if (recipeData.meals && recipeData.meals.length > 0) {
+    return transformMealData(recipeData.meals[0]);
+  } else {
+    // API failed to find a recipe, so we generate one with the AI cooker.
+    const generatedRecipe = await generateRecipeFromDishName({ dishName });
+    return generatedRecipe;
+  }
+};
+
 export async function getRecipeForImage(
   prevState: AppState,
   formData: FormData
@@ -81,34 +108,40 @@ export async function getRecipeForImage(
     return { status: "error", message: "Please upload a valid image file." };
   }
 
-  // You can't return "loading" from a server action to the client state during processing,
-  // so the client must handle the pending state. This action returns the final state.
   try {
     const buffer = await file.arrayBuffer();
     const photoDataUri = `data:${file.type};base64,${Buffer.from(buffer).toString("base64")}`;
 
-    const { dishName } = await identifyDishFromImage({ photoDataUri });
+    const { dishes } = await identifyDishFromImage({ photoDataUri });
 
-    if (!dishName) {
-      return { status: "error", message: "Could not identify the dish. Please try another image." };
+    if (!dishes || dishes.length === 0) {
+      return { status: "error", message: "Could not identify any dish. Please try another image." };
     }
 
-    const recipeResponse = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(dishName)}`);
-    if (!recipeResponse.ok) {
-       // Do not throw, handle gracefully
-      console.error("Failed to fetch from recipe API.");
-    }
-    
-    const recipeData = recipeResponse.ok ? await recipeResponse.json() : { meals: null };
-
-    if (recipeData.meals && recipeData.meals.length > 0) {
-      const recipe = transformMealData(recipeData.meals[0], photoDataUri);
-      return { status: "recipe", data: recipe };
+    if (dishes.length === 1) {
+      const recipe = await getRecipe(dishes[0]);
+      if (recipe) {
+        return { status: "recipe", data: { ...recipe, userImage: photoDataUri } };
+      } else {
+        return { status: "error", message: `Could not find or generate a recipe for ${dishes[0]}.` };
+      }
     } else {
-      // API failed to find a recipe, so we generate one with the AI cooker.
-      const generatedRecipe = await generateRecipeFromDishName({ dishName });
-      return { status: "recipe", data: { ...generatedRecipe, userImage: photoDataUri } };
+      const recipes = await Promise.all(dishes.map(dish => getRecipe(dish)));
+      const successfulRecipes = recipes.filter((r): r is Recipe => r !== null);
+      
+      if (successfulRecipes.length > 0) {
+        return {
+          status: "multi-recipe",
+          data: {
+            userImage: photoDataUri,
+            recipes: successfulRecipes,
+          },
+        };
+      } else {
+         return { status: "error", message: "Could not find or generate recipes for the identified dishes." };
+      }
     }
+
   } catch (error) {
     console.error(error);
     const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";

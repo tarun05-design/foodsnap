@@ -6,6 +6,7 @@ import FoodSnapLogo from "@/components/foodsnap/foodsnap-logo";
 import InitialState from "@/components/foodsnap/initial-state";
 import LoadingState from "@/components/foodsnap/loading-state";
 import RecipeDisplay from "@/components/foodsnap/recipe-display";
+import MultiRecipeDisplay from "@/components/foodsnap/multi-recipe-display";
 import SuggestionsDisplay from "@/components/foodsnap/suggestions-display";
 import ErrorState from "@/components/foodsnap/error-state";
 import { useEffect } from "react";
@@ -56,6 +57,10 @@ export default function Home() {
 
           {currentStatus === "recipe" && state.data && (
             <RecipeDisplay recipe={state.data} onReset={resetState} />
+          )}
+
+          {currentStatus === "multi-recipe" && state.data && (
+            <MultiRecipeDisplay result={state.data} onReset={resetState} />
           )}
 
           {currentStatus === "suggestions" && state.data && (
