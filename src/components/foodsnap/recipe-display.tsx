@@ -3,7 +3,7 @@ import { type Recipe } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Utensils, ChefHat, Youtube, RotateCw, BarChart, Clock } from "lucide-react";
+import { Utensils, ChefHat, Youtube, RotateCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type RecipeDisplayProps = {
@@ -12,8 +12,6 @@ type RecipeDisplayProps = {
 };
 
 export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
-  const difficulty = "Easy"; // Placeholder
-  const cookingTime = "30 mins"; // Placeholder
   const displayImage = recipe.userImage || recipe.thumbnail;
 
   return (
@@ -38,16 +36,6 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
             <CardDescription>
               A delicious {recipe.area} {recipe.category} dish.
             </CardDescription>
-            <div className="flex justify-center gap-4 pt-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                    <BarChart className="h-4 w-4 text-primary" />
-                    <span>{difficulty}</span>
-                </div>
-                 <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span>{cookingTime}</span>
-                </div>
-            </div>
         </div>
       </CardHeader>
       <CardContent className="px-4 sm:px-6">
