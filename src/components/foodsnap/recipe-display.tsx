@@ -14,13 +14,14 @@ type RecipeDisplayProps = {
 export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
   const difficulty = "Easy"; // Placeholder
   const cookingTime = "30 mins"; // Placeholder
+  const displayImage = recipe.userImage || recipe.thumbnail;
 
   return (
     <Card className="w-full animate-in fade-in-50 duration-500">
       <CardHeader className="items-center text-center">
         <div className="relative mb-4 h-64 w-full rounded-lg">
             <Image
-              src={recipe.thumbnail}
+              src={displayImage}
               alt={recipe.name}
               layout="fill"
               objectFit="cover"

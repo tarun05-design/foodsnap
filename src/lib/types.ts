@@ -12,6 +12,7 @@ export interface Recipe {
   thumbnail: string;
   youtubeUrl: string;
   ingredients: Ingredient[];
+  userImage?: string;
 }
 
 export interface Suggestions {

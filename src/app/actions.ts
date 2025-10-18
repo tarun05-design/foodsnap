@@ -43,7 +43,7 @@ export type AppState =
   | ErrorState;
 
 // Helper to transform TheMealDB API response to our Recipe type
-const transformMealData = (meal: any): Recipe => {
+const transformMealData = (meal: any, userImage?: string): Recipe => {
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ingredient = meal[`strIngredient${i}`];
@@ -62,6 +62,7 @@ const transformMealData = (meal: any): Recipe => {
     thumbnail: meal.strMealThumb,
     youtubeUrl: meal.strYoutube,
     ingredients,
+    userImage,
   };
 };
 
@@ -101,12 +102,12 @@ export async function getRecipeForImage(
     const recipeData = recipeResponse.ok ? await recipeResponse.json() : { meals: null };
 
     if (recipeData.meals && recipeData.meals.length > 0) {
-      const recipe = transformMealData(recipeData.meals[0]);
+      const recipe = transformMealData(recipeData.meals[0], photoDataUri);
       return { status: "recipe", data: recipe };
     } else {
       // API failed to find a recipe, so we generate one with the AI cooker.
       const generatedRecipe = await generateRecipeFromDishName({ dishName });
-      return { status: "recipe", data: generatedRecipe };
+      return { status: "recipe", data: { ...generatedRecipe, userImage: photoDataUri } };
     }
   } catch (error) {
     console.error(error);
