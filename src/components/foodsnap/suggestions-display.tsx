@@ -12,9 +12,9 @@ export default function SuggestionsDisplay({ result, onReset }: SuggestionsDispl
   return (
     <Card className="w-full animate-in fade-in-50 duration-500">
       <CardHeader className="text-center">
-        <CardTitle className="font-headline text-3xl">Recipe Not Found</CardTitle>
+        <CardTitle className="font-headline text-3xl">An Interesting Challenge!</CardTitle>
         <CardDescription>
-          We couldn't find a direct recipe for <span className="font-semibold text-primary">{result.dishName}</span>, but here are some creative suggestions!
+          I couldn't find a direct recipe for <span className="font-semibold text-primary">{result.dishName}</span>, but here are some creative ideas for you to try!
         </CardDescription>
       </CardHeader>
       <CardContent>
