@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useActionState } from "react";
@@ -41,11 +42,13 @@ export default function Home() {
   return (
     <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-4xl">
-        <header className="mb-8 flex items-center justify-center gap-4 text-center">
-          <FoodSnapLogo className="h-10 w-10" />
-          <h1 className="font-headline text-4xl font-bold tracking-tight text-primary md:text-5xl">
-            FoodSnap
-          </h1>
+        <header className="mb-8 flex items-center justify-center text-center">
+            <a href="#" onClick={(e) => { e.preventDefault(); resetState(); }} className="flex items-center gap-4 group">
+                <FoodSnapLogo className="h-10 w-10" />
+                <h1 className="font-headline text-4xl font-bold tracking-tight text-primary md:text-5xl group-hover:text-primary/90 transition-colors">
+                    FoodSnap
+                </h1>
+            </a>
         </header>
 
         <div className="transition-all duration-500">
