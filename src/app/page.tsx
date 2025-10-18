@@ -73,7 +73,7 @@ export default function Home() {
 
         </div>
         <footer className="mt-8 text-center text-sm text-muted-foreground">
-          <p>Powered by Generative AI. Recipes provided by TheMealDB.</p>
+          <p>Hey there! I'm your AI chef here @FoodSnap</p>
         </footer>
       </div>
     </main>
