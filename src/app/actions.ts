@@ -1,7 +1,7 @@
 "use server";
 
 import { identifyDishFromImage } from "@/ai/flows/identify-dish-from-image";
-import { suggestRecipeOnApiFailure } from "@/ai/flows/suggest-recipe-on-api-failure";
+import { generateRecipeFromDishName } from "@/ai/flows/generate-recipe-from-dish-name";
 import type { Recipe, Suggestions } from "@/lib/types";
 
 type RecipeState = {
@@ -101,12 +101,9 @@ export async function getRecipeForImage(
       const recipe = transformMealData(recipeData.meals[0]);
       return { status: "recipe", data: recipe };
     } else {
-      // API failed to find a recipe, so we suggest some.
-      const { suggestedRecipes } = await suggestRecipeOnApiFailure({ dishName });
-      return {
-        status: "suggestions",
-        data: { dishName, suggestions: suggestedRecipes },
-      };
+      // API failed to find a recipe, so we generate one with AI.
+      const generatedRecipe = await generateRecipeFromDishName({ dishName });
+      return { status: "recipe", data: generatedRecipe };
     }
   } catch (error) {
     console.error(error);
