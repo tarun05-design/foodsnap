@@ -54,7 +54,7 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
                     <li key={index} className="flex items-start gap-3">
                       <span className="mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/80" />
                       <div>
-                        <span className="font-semibold text-primary/90">{item.measure}</span> {item.ingredient}
+                        <span className="font-normal text-primary/90">{item.measure}</span> {item.ingredient}
                       </div>
                     </li>
                   ))}

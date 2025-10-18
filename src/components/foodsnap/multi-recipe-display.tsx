@@ -64,7 +64,7 @@ export default function MultiRecipeDisplay({ result, onReset }: MultiRecipeDispl
                             <li key={index} className="flex items-start gap-3">
                             <span className="mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/80" />
                             <div>
-                                <span className="font-semibold">{item.measure}</span> {item.ingredient}
+                                <span className="font-normal text-foreground">{item.measure}</span> {item.ingredient}
                             </div>
                             </li>
                         ))}
