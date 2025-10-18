@@ -1,12 +1,12 @@
 
 "use client";
 
-import { Camera, Upload, Video, X } from "lucide-react";
+import { Camera, Upload, Video, X, SwitchCamera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useFormStatus } from "react-dom";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
@@ -35,39 +35,70 @@ export default function InitialState({ formAction }: InitialStateProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [activeDeviceIndex, setActiveDeviceIndex] = useState(0);
+
   const { toast } = useToast();
+
+  const stopCameraStream = useCallback(() => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+  }, []);
+
+  const getCameraPermission = useCallback(async () => {
+    // Stop any existing stream before starting a new one
+    stopCameraStream();
+
+    try {
+      // First get the list of devices
+      const availableDevices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = availableDevices.filter(device => device.kind === 'videoinput');
+      setDevices(videoDevices);
+      
+      if (videoDevices.length === 0) {
+        throw new Error('No video input devices found.');
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          deviceId: { 
+            exact: videoDevices[activeDeviceIndex].deviceId 
+          } 
+        } 
+      });
+
+      setHasCameraPermission(true);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      setHasCameraPermission(false);
+      toast({
+        variant: 'destructive',
+        title: 'Camera Access Denied',
+        description: 'Please enable camera permissions in your browser settings to use this app.',
+      });
+    }
+  }, [activeDeviceIndex, toast, stopCameraStream]);
+
 
   useEffect(() => {
     if (showCamera) {
-      const getCameraPermission = async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          setHasCameraPermission(true);
-
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-        } catch (error) {
-          console.error('Error accessing camera:', error);
-          setHasCameraPermission(false);
-          toast({
-            variant: 'destructive',
-            title: 'Camera Access Denied',
-            description: 'Please enable camera permissions in your browser settings to use this app.',
-          });
-        }
-      };
-
       getCameraPermission();
     } else {
-      // Stop camera stream when not shown
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      }
+      stopCameraStream();
     }
-  }, [showCamera, toast]);
+
+    // Cleanup function to stop stream when component unmounts or showCamera becomes false
+    return () => {
+      stopCameraStream();
+    };
+  }, [showCamera, getCameraPermission, stopCameraStream]);
 
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,6 +118,12 @@ export default function InitialState({ formAction }: InitialStateProps) {
     fileInputRef.current?.click();
   };
 
+  const handleSwitchCamera = () => {
+    if(devices.length > 1) {
+      setActiveDeviceIndex((prevIndex) => (prevIndex + 1) % devices.length);
+    }
+  };
+  
   const handleCapture = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -141,7 +178,7 @@ export default function InitialState({ formAction }: InitialStateProps) {
                 <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
                   {previewUrl && !showCamera ? (
                     <div className="relative h-48 w-full max-w-sm">
-                      <Image src={previewUrl} alt="Image preview" layout="fill" objectFit="contain" className="rounded-md" />
+                      <Image src={previewUrl} alt="Image preview" fill objectFit="contain" className="rounded-md" />
                     </div>
                   ) : (
                     <>
@@ -167,16 +204,21 @@ export default function InitialState({ formAction }: InitialStateProps) {
                <div className="mt-4 flex flex-col items-center gap-4">
                 {previewUrl && showCamera ? (
                     <div className="relative h-48 w-full max-w-sm">
-                      <Image src={previewUrl} alt="Image preview" layout="fill" objectFit="contain" className="rounded-md" />
+                      <Image src={previewUrl} alt="Image preview" fill objectFit="contain" className="rounded-md" />
                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white" onClick={() => setPreviewUrl(null)}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
                   <>
-                    <div className="w-full max-w-sm overflow-hidden rounded-lg border">
+                    <div className="w-full max-w-sm overflow-hidden rounded-lg border relative">
                       <video ref={videoRef} className="w-full aspect-video" autoPlay muted playsInline />
                       <canvas ref={canvasRef} className="hidden" />
+                      {devices.length > 1 && (
+                        <Button onClick={handleSwitchCamera} variant="outline" size="icon" className="absolute bottom-2 right-2 bg-black/50 text-white hover:bg-black/70 hover:text-white">
+                          <SwitchCamera className="h-4 w-4"/>
+                        </Button>
+                      )}
                     </div>
                      {hasCameraPermission === false && (
                       <Alert variant="destructive">
@@ -206,3 +248,5 @@ export default function InitialState({ formAction }: InitialStateProps) {
     </Card>
   );
 }
+
+    
