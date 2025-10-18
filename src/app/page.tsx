@@ -16,7 +16,7 @@ const initialState: AppState = {
 };
 
 export default function Home() {
-  const [state, formAction] = useActionState(getRecipeForImage, initialState);
+  const [state, formAction, isPending] = useActionState(getRecipeForImage, initialState);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,6 +35,8 @@ export default function Home() {
     window.location.reload();
   };
 
+  const currentStatus = isPending ? "loading" : state.status;
+
   return (
     <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-4xl">
@@ -46,21 +48,21 @@ export default function Home() {
         </header>
 
         <div className="transition-all duration-500">
-          {state.status === "initial" && (
+          {currentStatus === "initial" && (
             <InitialState formAction={formAction} />
           )}
 
-          {state.status === "loading" && <LoadingState />}
+          {currentStatus === "loading" && <LoadingState />}
 
-          {state.status === "recipe" && state.data && (
+          {currentStatus === "recipe" && state.data && (
             <RecipeDisplay recipe={state.data} onReset={resetState} />
           )}
 
-          {state.status === "suggestions" && state.data && (
+          {currentStatus === "suggestions" && state.data && (
              <SuggestionsDisplay result={state.data} onReset={resetState} />
           )}
 
-          {(state.status === "error") && (
+          {(currentStatus === "error") && (
              <ErrorState message={state.message} onReset={resetState} />
           )}
 

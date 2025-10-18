@@ -2,6 +2,7 @@
 
 import { identifyDishFromImage } from "@/ai/flows/identify-dish-from-image";
 import { generateRecipeFromDishName } from "@/ai/flows/generate-recipe-from-dish-name";
+import { suggestRecipeOnApiFailure } from "@/ai/flows/suggest-recipe-on-api-failure";
 import type { Recipe, Suggestions } from "@/lib/types";
 
 type RecipeState = {
@@ -93,15 +94,26 @@ export async function getRecipeForImage(
 
     const recipeResponse = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(dishName)}`);
     if (!recipeResponse.ok) {
-      throw new Error("Failed to fetch from recipe API.");
+       // Do not throw, handle gracefully
+      console.error("Failed to fetch from recipe API.");
     }
-    const recipeData = await recipeResponse.json();
+    
+    const recipeData = recipeResponse.ok ? await recipeResponse.json() : { meals: null };
 
     if (recipeData.meals && recipeData.meals.length > 0) {
       const recipe = transformMealData(recipeData.meals[0]);
       return { status: "recipe", data: recipe };
     } else {
-      // API failed to find a recipe, so we generate one with AI.
+      // API failed to find a recipe, so we suggest some alternatives.
+      const { suggestedRecipes } = await suggestRecipeOnApiFailure({ dishName });
+      if (suggestedRecipes && suggestedRecipes.length > 0) {
+        return {
+          status: "suggestions",
+          data: { dishName, suggestions: suggestedRecipes },
+        };
+      }
+      
+      // If all else fails, generate a recipe as a last resort.
       const generatedRecipe = await generateRecipeFromDishName({ dishName });
       return { status: "recipe", data: generatedRecipe };
     }
