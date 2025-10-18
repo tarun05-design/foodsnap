@@ -111,14 +111,6 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
             <RotateCw className="mr-2 h-4 w-4" />
             Try Another
         </Button>
-        {recipe.youtubeUrl && (
-          <Button variant="outline" asChild>
-            <a href={recipe.youtubeUrl} target="_blank" rel="noopener noreferrer">
-              <Youtube className="mr-2 h-4 w-4" />
-              Watch on YouTube
-            </a>
-          </Button>
-        )}
       </CardFooter>
     </Card>
   );

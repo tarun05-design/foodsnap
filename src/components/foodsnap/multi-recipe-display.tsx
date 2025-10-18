@@ -116,14 +116,6 @@ export default function MultiRecipeDisplay({ result, onReset }: MultiRecipeDispl
                         )}
                     </TabsContent>
                 </Tabs>
-                {recipe.youtubeUrl && (
-                  <Button variant="outline" asChild size="sm" className="mt-4">
-                    <a href={recipe.youtubeUrl} target="_blank" rel="noopener noreferrer">
-                      <Youtube className="mr-2 h-4 w-4" />
-                      Watch on YouTube
-                    </a>
-                  </Button>
-                )}
               </AccordionContent>
             </AccordionItem>
           ))}
