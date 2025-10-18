@@ -1,3 +1,74 @@
+"use client";
+
+import { useFormState } from "react-dom";
+import { getRecipeForImage, type AppState } from "@/app/actions";
+import FoodSnapLogo from "@/components/foodsnap/foodsnap-logo";
+import InitialState from "@/components/foodsnap/initial-state";
+import LoadingState from "@/components/foodsnap/loading-state";
+import RecipeDisplay from "@/components/foodsnap/recipe-display";
+import SuggestionsDisplay from "@/components/foodsnap/suggestions-display";
+import ErrorState from "@/components/foodsnap/error-state";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+
+const initialState: AppState = {
+  status: "initial",
+};
+
 export default function Home() {
-  return <></>;
+  const [state, formAction] = useFormState(getRecipeForImage, initialState);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.status === "error" && state.message) {
+      toast({
+        variant: "destructive",
+        title: "An error occurred",
+        description: state.message,
+      });
+    }
+  }, [state, toast]);
+
+  const resetState = () => {
+    // A bit of a hack to reset the form state by re-invoking useFormState with initial state.
+    // In a real app, we might use a key on the form or a more complex state management library.
+    window.location.reload();
+  };
+
+  return (
+    <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-4xl">
+        <header className="mb-8 flex items-center justify-center gap-4 text-center">
+          <FoodSnapLogo className="h-10 w-10" />
+          <h1 className="font-headline text-4xl font-bold tracking-tight text-primary md:text-5xl">
+            FoodSnap
+          </h1>
+        </header>
+
+        <div className="transition-all duration-500">
+          {state.status === "initial" && (
+            <InitialState formAction={formAction} />
+          )}
+
+          {state.status === "loading" && <LoadingState />}
+
+          {state.status === "recipe" && state.data && (
+            <RecipeDisplay recipe={state.data} onReset={resetState} />
+          )}
+
+          {state.status === "suggestions" && state.data && (
+             <SuggestionsDisplay result={state.data} onReset={resetState} />
+          )}
+
+          {(state.status === "error") && (
+             <ErrorState message={state.message} onReset={resetState} />
+          )}
+
+        </div>
+        <footer className="mt-8 text-center text-sm text-muted-foreground">
+          <p>Powered by Generative AI. Recipes provided by TheMealDB.</p>
+        </footer>
+      </div>
+    </main>
+  );
 }
