@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Utensils, ChefHat, Youtube, RotateCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type RecipeDisplayProps = {
   recipe: Recipe;
@@ -45,14 +46,19 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
                 <TabsTrigger value="instructions"><ChefHat className="mr-2 h-4 w-4"/>Instructions</TabsTrigger>
             </TabsList>
             <TabsContent value="ingredients" className="py-6">
-                 <ul className="grid grid-cols-1 gap-x-8 gap-y-3 text-foreground sm:grid-cols-2">
+                <div className="space-y-4">
                   {recipe.ingredients.map((item, index) => (
-                    <li key={index} className="flex gap-3 items-start border-b border-dashed border-border/50 pb-2">
-                      <span className="font-semibold text-primary/90 w-28 flex-shrink-0">{item.measure}</span>
-                      <span>{item.ingredient}</span>
-                    </li>
+                    <div key={index} className="flex items-center space-x-3 rounded-md border border-border/70 bg-secondary/30 p-3">
+                      <Checkbox id={`ingredient-${index}`} className="h-5 w-5" />
+                      <label
+                        htmlFor={`ingredient-${index}`}
+                        className="flex-1 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                         <span className="font-semibold text-primary/90">{item.measure}</span> {item.ingredient}
+                      </label>
+                    </div>
                   ))}
-                </ul>
+                </div>
             </TabsContent>
             <TabsContent value="instructions" className="py-6">
                 <ol className="list-none space-y-6">
@@ -60,7 +66,7 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
                      step.trim() && (
                         <li key={index} className="flex gap-4 items-start">
                             <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">{index + 1}</span>
-                            <p className="mt-1 flex-1 text-foreground/90">{step}</p>
+                            <p className="mt-1 flex-1 text-base text-foreground/90">{step}</p>
                         </li>
                      )
                   ))}
