@@ -3,8 +3,9 @@ import { type Recipe } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Utensils, ChefHat, Youtube, RotateCw } from "lucide-react";
+import { Utensils, ChefHat, Youtube, RotateCw, BarChart } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type RecipeDisplayProps = {
   recipe: Recipe;
@@ -44,17 +45,18 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
       </CardHeader>
       <CardContent className="px-4 sm:px-6">
         <Tabs defaultValue="ingredients" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="ingredients"><Utensils className="mr-2 h-4 w-4"/>Ingredients</TabsTrigger>
                 <TabsTrigger value="instructions"><ChefHat className="mr-2 h-4 w-4"/>Instructions</TabsTrigger>
+                <TabsTrigger value="nutrition"><BarChart className="mr-2 h-4 w-4"/>Nutrition</TabsTrigger>
             </TabsList>
             <TabsContent value="ingredients" className="py-6">
-                <ul className="space-y-3 text-base text-foreground/90">
+                 <ul className="space-y-3 text-base text-foreground">
                   {recipe.ingredients.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <span className="mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/80" />
                       <div>
-                        <span className="font-normal text-primary/90">{item.measure}</span> {item.ingredient}
+                        <span className="font-normal text-foreground/90">{item.measure}</span> {item.ingredient}
                       </div>
                     </li>
                   ))}
@@ -70,6 +72,38 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
                      )
                   ))}
                 </ol>
+            </TabsContent>
+            <TabsContent value="nutrition" className="py-6">
+                {recipe.nutrition ? (
+                    <>
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                            <div className="rounded-lg bg-secondary/50 p-4 text-center">
+                                <p className="text-sm font-medium text-muted-foreground">Calories</p>
+                                <p className="font-headline text-2xl font-bold text-primary">{recipe.nutrition.calories}</p>
+                            </div>
+                            <div className="rounded-lg bg-secondary/50 p-4 text-center">
+                                <p className="text-sm font-medium text-muted-foreground">Protein</p>
+                                <p className="font-headline text-2xl font-bold text-primary">{recipe.nutrition.protein}</p>
+                            </div>
+                             <div className="rounded-lg bg-secondary/50 p-4 text-center">
+                                <p className="text-sm font-medium text-muted-foreground">Carbs</p>
+                                <p className="font-headline text-2xl font-bold text-primary">{recipe.nutrition.carbs}</p>
+                            </div>
+                             <div className="rounded-lg bg-secondary/50 p-4 text-center">
+                                <p className="text-sm font-medium text-muted-foreground">Fat</p>
+                                <p className="font-headline text-2xl font-bold text-primary">{recipe.nutrition.fat}</p>
+                            </div>
+                        </div>
+                        <Alert className="mt-6">
+                            <AlertTitle className="font-headline">Disclaimer</AlertTitle>
+                            <AlertDescription>
+                                Nutritional information is estimated by AI and may not be 100% accurate. Please consult a professional nutritionist for precise data.
+                            </AlertDescription>
+                        </Alert>
+                    </>
+                ) : (
+                    <p className="text-center text-muted-foreground">Nutritional information is not available for this recipe.</p>
+                )}
             </TabsContent>
         </Tabs>
       </CardContent>

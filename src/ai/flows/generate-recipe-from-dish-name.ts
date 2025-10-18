@@ -23,6 +23,13 @@ const IngredientSchema = z.object({
   measure: z.string().describe('The measurement for the ingredient (e.g., "1 cup", "200g").'),
 });
 
+const NutritionSchema = z.object({
+    calories: z.string().describe('Estimated calories for a single serving, e.g., "350 kcal".'),
+    protein: z.string().describe('Estimated protein in grams, e.g., "15g".'),
+    carbs: z.string().describe('Estimated carbohydrates in grams, e.g., "40g".'),
+    fat: z.string().describe('Estimated fat in grams, e.g., "12g".'),
+});
+
 const GenerateRecipeOutputSchema = z.object({
     id: z.string().describe('A unique identifier for the recipe, can be a generated UUID.'),
     name: z.string().describe('The name of the recipe.'),
@@ -32,6 +39,7 @@ const GenerateRecipeOutputSchema = z.object({
     thumbnail: z.string().describe('A URL for a placeholder thumbnail image for the dish.'),
     youtubeUrl: z.string().optional().describe('An optional URL to a YouTube video for the recipe.'),
     ingredients: z.array(IngredientSchema).describe('An array of ingredients with their measures.'),
+    nutrition: NutritionSchema.describe('Estimated nutritional information for a single serving of the dish.'),
 });
 export type GenerateRecipeOutput = z.infer<typeof GenerateRecipeOutputSchema>;
 
@@ -43,10 +51,13 @@ const generateRecipePrompt = ai.definePrompt({
   name: 'generateRecipeFromDishNamePrompt',
   input: {schema: GenerateRecipeInputSchema},
   output: {schema: GenerateRecipeOutputSchema},
-  prompt: `You are an expert chef and a clear, concise copywriter specializing in recipes. A user has requested a recipe for a dish called "{{dishName}}".
+  prompt: `You are an expert chef and a clear, concise copywriter specializing in recipes. You also have expertise as a nutritionist.
+  A user has requested a recipe for a dish called "{{dishName}}".
   The primary recipe database did not find a match. Your task is to generate a complete, delicious, and easy-to-follow recipe.
 
   **Crucially, the instructions must be short, clear, and highly readable.** Break down complex steps into smaller, simple actions. Each step should be one or two short sentences at most.
+
+  Based on the generated ingredients, you must also provide an estimated nutritional breakdown for a single serving.
 
   Please provide the following details in a JSON object:
   - id: A unique ID for this recipe. A random string is fine.
@@ -57,6 +68,7 @@ const generateRecipePrompt = ai.definePrompt({
   - thumbnail: Provide a placeholder image URL from picsum.photos. e.g. https://picsum.photos/seed/random-seed-123/500/500
   - youtubeUrl: If possible, a relevant YouTube link. If not, omit this field.
   - ingredients: A list of objects, each with an "ingredient" and a "measure".
+  - nutrition: An object with estimated calories, protein, carbs, and fat for a single serving. Format these as strings with units (e.g., "350 kcal", "15g").
 
   Ensure the recipe is practical for a home cook and the instructions are exceptionally easy to follow.
   `,

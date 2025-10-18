@@ -2,8 +2,9 @@
 
 import { identifyDishFromImage } from "@/ai/flows/identify-dish-from-image";
 import { generateRecipeFromDishName } from "@/ai/flows/generate-recipe-from-dish-name";
+import { getNutritionForRecipe } from "@/ai/flows/get-nutrition-for-recipe";
 import { suggestRecipeOnApiFailure } from "@/ai/flows/suggest-recipe-on-api-failure";
-import type { Recipe, Suggestions, MultiRecipe } from "@/lib/types";
+import type { Recipe, Suggestions, MultiRecipe, Nutrition } from "@/lib/types";
 
 type RecipeState = {
   status: "recipe";
@@ -51,7 +52,7 @@ export type AppState =
   | ErrorState;
 
 // Helper to transform TheMealDB API response to our Recipe type
-const transformMealData = (meal: any, userImage?: string): Recipe => {
+const transformMealData = (meal: any, userImage?: string): Omit<Recipe, 'nutrition'> => {
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ingredient = meal[`strIngredient${i}`];
@@ -85,9 +86,20 @@ const getRecipe = async (dishName: string): Promise<Recipe | null> => {
   const recipeData = await recipeResponse.json();
 
   if (recipeData.meals && recipeData.meals.length > 0) {
-    return transformMealData(recipeData.meals[0]);
+    const basicRecipe = transformMealData(recipeData.meals[0]);
+    // Now, get nutrition data for this recipe
+    try {
+        const nutrition = await getNutritionForRecipe({ ingredients: basicRecipe.ingredients });
+        return { ...basicRecipe, nutrition };
+    } catch (e) {
+        console.error("Failed to get nutrition data", e);
+        // Return recipe without nutrition if the AI call fails
+        return { ...basicRecipe };
+    }
+
   } else {
     // API failed to find a recipe, so we generate one with the AI cooker.
+    // This already includes nutrition info.
     const generatedRecipe = await generateRecipeFromDishName({ dishName });
     return generatedRecipe;
   }

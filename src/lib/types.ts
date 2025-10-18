@@ -3,6 +3,13 @@ export interface Ingredient {
   measure: string;
 }
 
+export interface Nutrition {
+  calories: string;
+  protein: string;
+  carbs: string;
+  fat: string;
+}
+
 export interface Recipe {
   id: string;
   name: string;
@@ -13,6 +20,7 @@ export interface Recipe {
   youtubeUrl?: string;
   ingredients: Ingredient[];
   userImage?: string;
+  nutrition?: Nutrition;
 }
 
 export interface Suggestions {
