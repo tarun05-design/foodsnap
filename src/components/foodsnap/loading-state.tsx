@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Utensils, Zap } from "lucide-react";
@@ -40,7 +41,7 @@ export default function LoadingState() {
       </Card>
       <div className="mt-4 flex animate-pulse items-center justify-center gap-2 text-sm text-muted-foreground">
         <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]"></div>
-        <p>Analyzing your photo and cooking up a delicious plan...</p>
+        <p>Prepping the kitchen, analyzing your photo, and cooking up a plan...</p>
         <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]"></div>
         <div className="h-2 w-2 animate-bounce rounded-full bg-primary"></div>
       </div>

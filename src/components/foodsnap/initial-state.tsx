@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Camera, Upload, Video, X } from "lucide-react";
@@ -21,7 +22,7 @@ function SubmitButton() {
   return (
     <Button type="submit" disabled={pending} className="w-full sm:w-auto">
       <Upload className="mr-2 h-4 w-4" />
-      {pending ? "Analyzing..." : "Find Recipe"}
+      {pending ? "Analyzing..." : "Reveal the Recipe"}
     </Button>
   );
 }
@@ -118,8 +119,8 @@ export default function InitialState({ formAction }: InitialStateProps) {
   return (
     <Card className="w-full animate-in fade-in-50 duration-500">
       <CardHeader className="text-center">
-        <CardTitle className="font-headline text-3xl">What's on your plate?</CardTitle>
-        <CardDescription>Upload a photo of your meal, or use your camera to snap a pic.</CardDescription>
+        <CardTitle className="font-headline text-3xl">What masterpiece are we making?</CardTitle>
+        <CardDescription>Upload a photo of a dish, and I'll whip up the recipe for you.</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="flex flex-col gap-6">
@@ -145,8 +146,8 @@ export default function InitialState({ formAction }: InitialStateProps) {
                   ) : (
                     <>
                       <Camera className="h-12 w-12" />
-                      <p className="font-semibold text-foreground">Click to upload an image</p>
-                      <p className="text-xs">PNG, JPG, or WEBP up to 10MB</p>
+                      <p className="font-semibold text-foreground">Click to select your delicious dish</p>
+                      <p className="text-xs">PNG, JPG, or WEBP supported</p>
                     </>
                   )}
                 </div>
