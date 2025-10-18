@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import { getRecipeForImage, type AppState } from "@/app/actions";
 import FoodSnapLogo from "@/components/foodsnap/foodsnap-logo";
 import InitialState from "@/components/foodsnap/initial-state";
@@ -16,7 +16,7 @@ const initialState: AppState = {
 };
 
 export default function Home() {
-  const [state, formAction] = useFormState(getRecipeForImage, initialState);
+  const [state, formAction] = useActionState(getRecipeForImage, initialState);
   const { toast } = useToast();
 
   useEffect(() => {
