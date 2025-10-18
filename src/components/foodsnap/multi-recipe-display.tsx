@@ -56,10 +56,9 @@ export default function MultiRecipeDisplay({ result, onReset }: MultiRecipeDispl
                     <Badge variant="secondary">{recipe.category}</Badge>
                 </div>
                  <Tabs defaultValue="ingredients" className="w-full pt-4">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="ingredients"><Utensils className="mr-2 h-4 w-4"/>Ingredients</TabsTrigger>
                         <TabsTrigger value="instructions"><ChefHat className="mr-2 h-4 w-4"/>Instructions</TabsTrigger>
-                        <TabsTrigger value="nutrition"><BarChart className="mr-2 h-4 w-4"/>Nutrition</TabsTrigger>
                     </TabsList>
                     <TabsContent value="ingredients" className="py-6">
                         <ul className="space-y-3 text-base text-foreground">
@@ -83,10 +82,12 @@ export default function MultiRecipeDisplay({ result, onReset }: MultiRecipeDispl
                             )
                         ))}
                         </ol>
-                    </TabsContent>
-                    <TabsContent value="nutrition" className="py-6">
-                        {recipe.nutrition ? (
-                            <>
+                        {recipe.nutrition && (
+                            <div className="mt-8 border-t pt-6">
+                                <h3 className="mb-4 flex items-center font-headline text-xl">
+                                    <BarChart className="mr-3 h-5 w-5 text-primary" />
+                                    Nutrition Facts
+                                </h3>
                                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                                     <div className="rounded-lg bg-secondary/50 p-4 text-center">
                                         <p className="text-sm font-medium text-muted-foreground">Calories</p>
@@ -111,9 +112,7 @@ export default function MultiRecipeDisplay({ result, onReset }: MultiRecipeDispl
                                         Nutritional information is estimated by AI and may not be 100% accurate. Please consult a professional nutritionist for precise data.
                                     </AlertDescription>
                                 </Alert>
-                            </>
-                        ) : (
-                            <p className="text-center text-muted-foreground">Nutritional information is not available for this recipe.</p>
+                            </div>
                         )}
                     </TabsContent>
                 </Tabs>
