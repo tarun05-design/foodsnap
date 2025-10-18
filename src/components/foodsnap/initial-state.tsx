@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Camera, Upload, RefreshCw } from "lucide-react";
@@ -26,6 +27,7 @@ function SubmitButton({ pending, disabled }: { pending: boolean, disabled?: bool
 
 export default function InitialState({ formAction }: InitialStateProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -143,7 +145,7 @@ export default function InitialState({ formAction }: InitialStateProps) {
   };
 
   const takePicture = () => {
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && cameraInputRef.current && formRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
@@ -152,23 +154,16 @@ export default function InitialState({ formAction }: InitialStateProps) {
       context?.drawImage(video, 0, 0, canvas.width, canvas.height);
       const dataUrl = canvas.toDataURL('image/jpeg');
 
-      // Convert data URL to Blob
       fetch(dataUrl)
         .then(res => res.blob())
         .then(blob => {
-          // Create a File object
-          const file = new File([blob], "foodsnap.jpg", { type: "image/jpeg" });
-          
-          // Use DataTransfer to create a FileList
+          const file = new File([blob], "foodsnap-camera.jpg", { type: "image/jpeg" });
           const dataTransfer = new DataTransfer();
           dataTransfer.items.add(file);
-
-          // Create a new FormData and dispatch the action
-          const formData = new FormData(formRef.current!);
-          formData.set('image', file);
+          cameraInputRef.current!.files = dataTransfer.files;
           
-          // Directly call the form action
-          formAction(formData);
+          // Programmatically submit the form
+          formRef.current?.requestSubmit();
         });
     }
   };
@@ -178,7 +173,7 @@ export default function InitialState({ formAction }: InitialStateProps) {
     <Card className="w-full animate-in fade-in-50 duration-500">
       <CardHeader className="text-center">
         <CardTitle className="font-headline text-3xl">Snap a photo. Get a recipe.</CardTitle>
-        <CardDescription>Ever see a dish and wonder how to make it? Now you can. Just upload a photo or use your camera.</CardDescription>
+        <CardDescription>Ever see a dish and wonder how to make it? Now you can. Just upload a photo to get started.</CardDescription>
       </CardHeader>
       <CardContent>
         <form ref={formRef} action={formAction} className="flex flex-col gap-6">
@@ -224,7 +219,7 @@ export default function InitialState({ formAction }: InitialStateProps) {
                   className="sr-only"
                   accept="image/png, image/jpeg, image/webp"
                   onChange={handleFileChange}
-                  required
+                  required={true}
                 />
               </div>
               <div className="mt-6 flex justify-center">
@@ -250,6 +245,7 @@ export default function InitialState({ formAction }: InitialStateProps) {
                         )}
                     </div>
                     <canvas ref={canvasRef} className="hidden" />
+                    <Input ref={cameraInputRef} type="file" name="image" className="sr-only" required={true} />
 
                     <div className="flex w-full items-center justify-center gap-4">
                         <Button type="button" size="lg" onClick={takePicture} disabled={!hasCameraPermission || pending}>
