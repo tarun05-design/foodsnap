@@ -35,9 +35,9 @@ export default function MultiRecipeDisplay({ result, onReset }: MultiRecipeDispl
              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
         <div className="px-6 pb-4 text-center">
-            <CardTitle className="font-headline text-3xl md:text-4xl pt-2">We found a few dishes!</CardTitle>
+            <CardTitle className="font-headline text-3xl md:text-4xl pt-2">A Feast of Recipes!</CardTitle>
             <CardDescription className="mx-auto max-w-lg pt-1">
-                Here are the recipes for the dishes we identified in your photo.
+                We've identified each dish in your photo and found a delicious recipe for every one.
             </CardDescription>
         </div>
       </CardHeader>
