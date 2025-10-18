@@ -3,7 +3,7 @@ import { type Recipe } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Utensils, Soup, Youtube, ChefHat, RotateCw, BarChart, Clock } from "lucide-react";
+import { Utensils, ChefHat, Youtube, RotateCw, BarChart, Clock } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type RecipeDisplayProps = {
@@ -18,8 +18,8 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
 
   return (
     <Card className="w-full animate-in fade-in-50 duration-500">
-      <CardHeader className="items-center text-center">
-        <div className="relative mb-4 h-64 w-full rounded-lg">
+      <CardHeader className="p-0">
+        <div className="relative mb-4 h-64 w-full">
             <Image
               src={displayImage}
               alt={recipe.name}
@@ -29,30 +29,32 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
               data-ai-hint="food meal"
             />
         </div>
-        <div className="flex justify-center gap-2 pt-2">
-          <Badge variant="secondary">{recipe.area}</Badge>
-          <Badge variant="secondary">{recipe.category}</Badge>
-        </div>
-        <CardTitle className="font-headline text-3xl md:text-4xl pt-2">{recipe.name}</CardTitle>
-        <CardDescription>
-          A delicious {recipe.area} {recipe.category} dish.
-        </CardDescription>
-        <div className="flex justify-center gap-4 pt-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-                <BarChart className="h-4 w-4 text-primary" />
-                <span>{difficulty}</span>
+        <div className="px-6 pb-4 text-center">
+            <div className="flex justify-center gap-2 pt-2">
+              <Badge variant="secondary">{recipe.area}</Badge>
+              <Badge variant="secondary">{recipe.category}</Badge>
             </div>
-             <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4 text-primary" />
-                <span>{cookingTime}</span>
+            <CardTitle className="font-headline text-3xl md:text-4xl pt-2">{recipe.name}</CardTitle>
+            <CardDescription>
+              A delicious {recipe.area} {recipe.category} dish.
+            </CardDescription>
+            <div className="flex justify-center gap-4 pt-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                    <BarChart className="h-4 w-4 text-primary" />
+                    <span>{difficulty}</span>
+                </div>
+                 <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <span>{cookingTime}</span>
+                </div>
             </div>
         </div>
       </CardHeader>
       <CardContent className="px-4 sm:px-6">
         <Tabs defaultValue="ingredients" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="ingredients"><Utensils className="mr-2"/>Ingredients</TabsTrigger>
-                <TabsTrigger value="instructions"><ChefHat className="mr-2"/>Instructions</TabsTrigger>
+                <TabsTrigger value="ingredients"><Utensils className="mr-2 h-4 w-4"/>Ingredients</TabsTrigger>
+                <TabsTrigger value="instructions"><ChefHat className="mr-2 h-4 w-4"/>Instructions</TabsTrigger>
             </TabsList>
             <TabsContent value="ingredients" className="py-6">
                  <ul className="grid grid-cols-1 gap-x-6 gap-y-3 text-foreground sm:grid-cols-2">
@@ -65,14 +67,16 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
                 </ul>
             </TabsContent>
             <TabsContent value="instructions" className="py-6">
-                <div className="prose prose-sm max-w-none space-y-4 text-foreground">
+                <ol className="prose prose-sm max-w-none space-y-4 text-foreground">
                   {recipe.instructions.map((step, index) => (
-                    <div key={index} className="flex gap-4 items-start">
-                        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-accent font-bold text-accent-foreground text-sm">{index + 1}</span>
-                        <p>{step}</p>
-                    </div>
+                     step.trim() && (
+                        <li key={index} className="flex gap-4 items-start">
+                            <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-accent font-bold text-accent-foreground text-sm">{index + 1}</span>
+                            <p className="mt-0.5">{step}</p>
+                        </li>
+                     )
                   ))}
-                </div>
+                </ol>
             </TabsContent>
         </Tabs>
       </CardContent>
