@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useFormStatus } from "react-dom";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -37,69 +37,91 @@ export default function InitialState({ formAction }: InitialStateProps) {
   const { toast } = useToast();
   const { pending } = useFormStatus();
 
-  useEffect(() => {
-    const getCameraDevices = async () => {
-        try {
-            await navigator.mediaDevices.getUserMedia({ video: true });
-            const allDevices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = allDevices.filter(device => device.kind === 'videoinput');
-            setDevices(videoDevices);
-            if (videoDevices.length > 0) {
-                setActiveDeviceId(videoDevices[0].deviceId);
-            }
-        } catch (error) {
-            // Permission denied or no camera found, handled in startCamera
+  const getCameraDevices = useCallback(async () => {
+    try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+            throw new Error("Camera features are not supported in this browser.");
         }
-    };
-    getCameraDevices();
-  }, []);
+        await navigator.mediaDevices.getUserMedia({ video: true }); // Prompt for permission
+        const allDevices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = allDevices.filter(device => device.kind === 'videoinput');
+        setDevices(videoDevices);
+        if (videoDevices.length > 0 && !activeDeviceId) {
+            setActiveDeviceId(videoDevices[0].deviceId);
+        }
+    } catch (error) {
+        console.error('Error enumerating camera devices:', error);
+        let message = "Could not access the camera. Please ensure it's not being used by another app.";
+        if (error instanceof DOMException) {
+            if (error.name === "NotAllowedError") {
+              message = "Camera access was denied. Please enable camera permissions in your browser settings to use this feature.";
+            } else if (error.name === "NotFoundError") {
+              message = "No camera was found on your device.";
+            }
+        }
+        setCameraError(message);
+        setHasCameraPermission(false);
+    }
+  }, [activeDeviceId]);
 
-
-  const startCamera = async (deviceId?: string) => {
-    // Stop any existing stream
+  const startCamera = useCallback(async (deviceId?: string) => {
     if (videoRef.current?.srcObject) {
       (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
     }
 
     try {
-      const constraints = {
-        video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" }
-      };
+      if (typeof window !== 'undefined' && window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        throw new Error("Camera access is only available on secure (HTTPS) connections or localhost.");
+      }
+      const constraints = { video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" } };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setHasCameraPermission(true);
       setCameraError(null);
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-      if (!activeDeviceId && devices.length > 0) {
-        const currentTrack = stream.getVideoTracks()[0];
-        const currentDeviceId = currentTrack.getSettings().deviceId;
-        setActiveDeviceId(currentDeviceId);
+      
+      const currentTrack = stream.getVideoTracks()[0];
+      const currentDeviceId = currentTrack.getSettings().deviceId;
+      if (currentDeviceId && !devices.some(d => d.deviceId === currentDeviceId)) {
+          // If the active stream's device is not in the list, refresh the list.
+          getCameraDevices();
       }
+      setActiveDeviceId(currentDeviceId);
 
     } catch (error) {
       console.error('Error accessing camera:', error);
       setHasCameraPermission(false);
       let message = "Could not access the camera. Please ensure it's not being used by another app.";
-      if (error instanceof DOMException && error.name === "NotAllowedError") {
-        message = "Camera access was denied. Please enable camera permissions in your browser settings to use this feature.";
+      if (error instanceof DOMException) {
+        if (error.name === "NotAllowedError") {
+          message = "Camera access was denied. Please enable camera permissions in your browser settings to use this feature.";
+        } else if (error.name === "NotFoundError") {
+            message = "No camera was found for the selected option."
+        }
+      } else if (error instanceof Error) {
+        message = error.message;
       }
+
       setCameraError(message);
       toast({
         variant: "destructive",
-        title: "Camera Access Denied",
+        title: "Camera Error",
         description: message,
       });
     }
-  };
+  }, [devices, getCameraDevices, toast]);
 
   const switchCamera = () => {
     if(devices.length < 2 || !activeDeviceId) return;
     const currentIndex = devices.findIndex(d => d.deviceId === activeDeviceId);
     const nextIndex = (currentIndex + 1) % devices.length;
     const nextDevice = devices[nextIndex];
-    setActiveDeviceId(nextDevice.deviceId);
-    startCamera(nextDevice.deviceId);
+    if (nextDevice) {
+        setActiveDeviceId(nextDevice.deviceId);
+        startCamera(nextDevice.deviceId);
+    }
   };
 
 
@@ -162,7 +184,10 @@ export default function InitialState({ formAction }: InitialStateProps) {
         <form ref={formRef} action={formAction} className="flex flex-col gap-6">
           <Tabs defaultValue="upload" className="w-full" onValueChange={(value) => {
             if (value === 'camera') {
-              startCamera(activeDeviceId);
+                if (devices.length === 0) {
+                    getCameraDevices();
+                }
+                startCamera(activeDeviceId);
             } else {
                if (videoRef.current?.srcObject) {
                 (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
