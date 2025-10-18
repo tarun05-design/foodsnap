@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Utensils, ChefHat, Youtube, RotateCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
 
 type RecipeDisplayProps = {
   recipe: Recipe;
@@ -35,7 +34,7 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
             </div>
             <CardTitle className="font-headline text-3xl md:text-4xl pt-2">{recipe.name}</CardTitle>
             <CardDescription>
-              A delicious {recipe.area} {recipe.category} dish.
+              We couldn't find an exact match, but our AI chef cooked up this delicious idea for you!
             </CardDescription>
         </div>
       </CardHeader>
@@ -46,27 +45,20 @@ export default function RecipeDisplay({ recipe, onReset }: RecipeDisplayProps) {
                 <TabsTrigger value="instructions"><ChefHat className="mr-2 h-4 w-4"/>Instructions</TabsTrigger>
             </TabsList>
             <TabsContent value="ingredients" className="py-6">
-                <div className="space-y-4">
+                <ul className="list-disc space-y-2 pl-5 text-base text-foreground/90">
                   {recipe.ingredients.map((item, index) => (
-                    <div key={index} className="flex items-center space-x-3 rounded-md border border-border/70 bg-secondary/30 p-3">
-                      <Checkbox id={`ingredient-${index}`} className="h-5 w-5" />
-                      <label
-                        htmlFor={`ingredient-${index}`}
-                        className="flex-1 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                         <span className="font-semibold text-primary/90">{item.measure}</span> {item.ingredient}
-                      </label>
-                    </div>
+                    <li key={index}>
+                      <span className="font-semibold text-primary/90">{item.measure}</span> {item.ingredient}
+                    </li>
                   ))}
-                </div>
+                </ul>
             </TabsContent>
             <TabsContent value="instructions" className="py-6">
-                <ol className="list-none space-y-6">
+                <ol className="list-decimal space-y-4 pl-5 text-base text-foreground/90">
                   {recipe.instructions.map((step, index) => (
                      step.trim() && (
-                        <li key={index} className="flex gap-4 items-start">
-                            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">{index + 1}</span>
-                            <p className="mt-1 flex-1 text-base text-foreground/90">{step}</p>
+                        <li key={index} className="pl-2">
+                           {step}
                         </li>
                      )
                   ))}
