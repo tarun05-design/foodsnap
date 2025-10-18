@@ -43,20 +43,22 @@ const generateRecipePrompt = ai.definePrompt({
   name: 'generateRecipeFromDishNamePrompt',
   input: {schema: GenerateRecipeInputSchema},
   output: {schema: GenerateRecipeOutputSchema},
-  prompt: `You are an expert chef. A user has requested a recipe for a dish called "{{dishName}}".
-  The primary recipe database did not find a match. Your task is to generate a complete, delicious, and easy-to-follow recipe for this dish.
+  prompt: `You are an expert chef and a clear, concise copywriter specializing in recipes. A user has requested a recipe for a dish called "{{dishName}}".
+  The primary recipe database did not find a match. Your task is to generate a complete, delicious, and easy-to-follow recipe.
+
+  **Crucially, the instructions must be short, clear, and highly readable.** Break down complex steps into smaller, simple actions. Each step should be one or two short sentences at most.
 
   Please provide the following details in a JSON object:
   - id: A unique ID for this recipe. A random string is fine.
   - name: The name of the dish, which should be "{{dishName}}".
   - category: The best-fitting category for this dish (e.g., "Seafood", "Vegetarian", "Dessert").
   - area: The cuisine of origin (e.g., "Italian", "Thai", "American").
-  - instructions: A list of step-by-step instructions.
+  - instructions: A list of short, step-by-step instructions. For example: ["Mix the dry ingredients.", "Add the eggs and milk.", "Bake for 20 minutes at 350°F."].
   - thumbnail: Provide a placeholder image URL from picsum.photos. e.g. https://picsum.photos/seed/random-seed-123/500/500
   - youtubeUrl: If possible, a relevant YouTube link. If not, omit this field.
   - ingredients: A list of objects, each with an "ingredient" and a "measure".
 
-  Be creative but ensure the recipe is practical for a home cook. The instructions should be clear and concise.
+  Ensure the recipe is practical for a home cook and the instructions are exceptionally easy to follow.
   `,
 });
 
