@@ -22,7 +22,7 @@ function SubmitButton() {
   return (
     <Button type="submit" disabled={pending} className="w-full sm:w-auto">
       <Upload className="mr-2 h-4 w-4" />
-      {pending ? "Analyzing..." : "Reveal the Recipe"}
+      {pending ? "Analyzing..." : "Get the Recipe"}
     </Button>
   );
 }
@@ -119,8 +119,8 @@ export default function InitialState({ formAction }: InitialStateProps) {
   return (
     <Card className="w-full animate-in fade-in-50 duration-500">
       <CardHeader className="text-center">
-        <CardTitle className="font-headline text-3xl">What masterpiece are we making?</CardTitle>
-        <CardDescription>Upload a photo of a dish, and I'll whip up the recipe for you.</CardDescription>
+        <CardTitle className="font-headline text-3xl">Snap a photo. Get a recipe.</CardTitle>
+        <CardDescription>Ever see a dish and wonder how to make it? Now you can. Just upload a photo to get started.</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="flex flex-col gap-6">
