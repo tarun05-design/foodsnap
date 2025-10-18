@@ -104,16 +104,7 @@ export async function getRecipeForImage(
       const recipe = transformMealData(recipeData.meals[0]);
       return { status: "recipe", data: recipe };
     } else {
-      // API failed to find a recipe, so we suggest some alternatives.
-      const { suggestedRecipes } = await suggestRecipeOnApiFailure({ dishName });
-      if (suggestedRecipes && suggestedRecipes.length > 0) {
-        return {
-          status: "suggestions",
-          data: { dishName, suggestions: suggestedRecipes },
-        };
-      }
-      
-      // If all else fails, generate a recipe as a last resort.
+      // API failed to find a recipe, so we generate one with the AI cooker.
       const generatedRecipe = await generateRecipeFromDishName({ dishName });
       return { status: "recipe", data: generatedRecipe };
     }
