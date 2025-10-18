@@ -12,6 +12,7 @@ import SuggestionsDisplay from "@/components/foodsnap/suggestions-display";
 import ErrorState from "@/components/foodsnap/error-state";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 const initialState: AppState = {
   status: "initial",
@@ -76,7 +77,8 @@ export default function Home() {
 
         </div>
         <footer className="mt-8 text-center text-sm text-muted-foreground">
-          <p>Hey there! I'm your AI chef @FoodSnap</p>
+            <p className="mb-2">Hey there! I'm your AI chef @FoodSnap</p>
+            <Link href="/privacy" className="text-muted-foreground hover:text-primary underline">Privacy Policy</Link>
         </footer>
       </div>
     </main>
