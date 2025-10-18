@@ -59,12 +59,12 @@ export default function MultiRecipeDisplay({ result, onReset }: MultiRecipeDispl
                             <Utensils />
                             Ingredients
                         </h3>
-                        <ul className="space-y-3 text-base text-foreground/90">
+                        <ul className="space-y-3 text-base text-foreground">
                         {recipe.ingredients.map((item, index) => (
                             <li key={index} className="flex items-start gap-3">
                             <span className="mt-1.5 block h-2 w-2 flex-shrink-0 rounded-full bg-primary/80" />
                             <div>
-                                <span className="font-semibold text-primary/90">{item.measure}</span> {item.ingredient}
+                                <span className="font-semibold">{item.measure}</span> {item.ingredient}
                             </div>
                             </li>
                         ))}
