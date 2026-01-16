@@ -4,7 +4,8 @@ import { identifyDishFromImage } from "@/ai/flows/identify-dish-from-image";
 import { generateRecipeFromDishName } from "@/ai/flows/generate-recipe-from-dish-name";
 import { getNutritionForRecipe } from "@/ai/flows/get-nutrition-for-recipe";
 import { suggestRecipeOnApiFailure } from "@/ai/flows/suggest-recipe-on-api-failure";
-import type { Recipe, Suggestions, MultiRecipe, Nutrition } from "@/lib/types";
+import { scaleRecipeIngredients } from "@/ai/flows/scale-recipe-ingredients";
+import type { Recipe, Suggestions, MultiRecipe, Ingredient } from "@/lib/types";
 
 type RecipeState = {
   status: "recipe";
@@ -52,7 +53,7 @@ export type AppState =
   | ErrorState;
 
 // Helper to transform TheMealDB API response to our Recipe type
-const transformMealData = (meal: any, userImage?: string): Omit<Recipe, 'nutrition'> => {
+const transformMealData = (meal: any, userImage?: string): Omit<Recipe, 'nutrition' | 'servings'> => {
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ingredient = meal[`strIngredient${i}`];
@@ -69,8 +70,6 @@ const transformMealData = (meal: any, userImage?: string): Omit<Recipe, 'nutriti
     area: meal.strArea,
     instructions: meal.strInstructions.split('\r\n').filter((line: string) => line.trim() !== ''),
     thumbnail: meal.strMealThumb,
-    youtubeUrl: meal.strYoutube,
-    ingredients,
     userImage,
   };
 };
@@ -89,12 +88,12 @@ const getRecipe = async (dishName: string): Promise<Recipe | null> => {
     const basicRecipe = transformMealData(recipeData.meals[0]);
     // Now, get nutrition data for this recipe
     try {
-        const nutrition = await getNutritionForRecipe({ ingredients: basicRecipe.ingredients });
-        return { ...basicRecipe, nutrition };
+        const { servings, ...nutrition } = await getNutritionForRecipe({ ingredients: basicRecipe.ingredients });
+        return { ...basicRecipe, servings, nutrition };
     } catch (e) {
         console.error("Failed to get nutrition data", e);
         // Return recipe without nutrition if the AI call fails
-        return { ...basicRecipe };
+        return { ...basicRecipe, servings: 2 };
     }
 
   } else {
@@ -162,4 +161,25 @@ export async function getRecipeForImage(
     }
     return { status: "error", message: "Failed to process the image. Please try again." };
   }
+}
+
+export async function getScaledIngredients(
+    originalIngredients: Ingredient[],
+    originalServings: number,
+    newServings: number,
+): Promise<Ingredient[]> {
+    if (originalServings === newServings) return originalIngredients;
+    try {
+        const { scaledIngredients } = await scaleRecipeIngredients({
+            ingredients: originalIngredients,
+            originalServings,
+            newServings,
+        });
+        return scaledIngredients;
+    } catch (error) {
+        console.error("Failed to scale recipe with AI", error);
+        // On failure, just return the original ingredients to prevent a crash.
+        // A toast could be shown on the client.
+        throw new Error("Failed to adjust ingredient quantities.");
+    }
 }

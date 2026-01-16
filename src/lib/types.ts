@@ -20,7 +20,8 @@ export interface Recipe {
   youtubeUrl?: string;
   ingredients: Ingredient[];
   userImage?: string;
-  nutrition?: Nutrition;
+  nutrition?: Nutrition; // PER SERVING
+  servings?: number;
 }
 
 export interface Suggestions {

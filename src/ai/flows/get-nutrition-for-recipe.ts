@@ -24,10 +24,11 @@ const GetNutritionInputSchema = z.object({
 export type GetNutritionInput = z.infer<typeof GetNutritionInputSchema>;
 
 const GetNutritionOutputSchema = z.object({
-  calories: z.string().describe('Estimated calories for the entire dish, e.g., "1200 kcal".'),
-  protein: z.string().describe('Estimated protein in grams for the entire dish, e.g., "60g".'),
-  carbs: z.string().describe('Estimated carbohydrates in grams for the entire dish, e.g., "150g".'),
-  fat: z.string().describe('Estimated fat in grams for the entire dish, e.g., "45g".'),
+  servings: z.number().describe('The estimated number of servings this recipe makes.'),
+  calories: z.string().describe('Estimated calories for a single serving as a numerical string, e.g., "350".'),
+  protein: z.string().describe('Estimated protein in grams for a single serving as a numerical string, e.g., "15".'),
+  carbs: z.string().describe('Estimated carbohydrates in grams for a single serving as a numerical string, e.g., "40".'),
+  fat: z.string().describe('Estimated fat in grams for a single serving as a numerical string, e.g., "12".'),
 });
 export type GetNutritionOutput = z.infer<typeof GetNutritionOutputSchema>;
 
@@ -39,9 +40,18 @@ const getNutritionPrompt = ai.definePrompt({
   name: 'getNutritionForRecipePrompt',
   input: {schema: GetNutritionInputSchema},
   output: {schema: GetNutritionOutputSchema},
-  prompt: `You are an expert nutritionist. Based on the following list of ingredients and their measurements, calculate the estimated total nutritional information for the entire recipe.
+  prompt: `You are an expert nutritionist and chef. Based on the following list of ingredients and their measurements, first estimate how many servings this recipe likely makes (e.g., 2, 4, 6).
   
-  Please provide the result as a JSON object with the estimated total calories, protein, carbs, and fat. Format the values as strings with units (e.g., "1200 kcal", "60g").
+  Then, calculate the estimated nutritional information **for a single serving**.
+
+  Please provide the result as a JSON object with:
+  - servings: The estimated number of servings.
+  - calories: Estimated calories for ONE serving.
+  - protein: Estimated protein in grams for ONE serving.
+  - carbs: Estimated carbohydrates in grams for ONE serving.
+  - fat: Estimated fat in grams for ONE serving.
+  
+  Format the nutritional values as numerical strings without units.
 
   Ingredients:
   {{#each ingredients}}

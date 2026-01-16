@@ -24,10 +24,10 @@ const IngredientSchema = z.object({
 });
 
 const NutritionSchema = z.object({
-    calories: z.string().describe('Estimated calories for a single serving, e.g., "350 kcal".'),
-    protein: z.string().describe('Estimated protein in grams, e.g., "15g".'),
-    carbs: z.string().describe('Estimated carbohydrates in grams, e.g., "40g".'),
-    fat: z.string().describe('Estimated fat in grams, e.g., "12g".'),
+    calories: z.string().describe('Estimated calories for a single serving as a numerical string, e.g., "350".'),
+    protein: z.string().describe('Estimated protein in grams for a single serving as a numerical string, e.g., "15".'),
+    carbs: z.string().describe('Estimated carbohydrates in grams for a single serving as a numerical string, e.g., "40".'),
+    fat: z.string().describe('Estimated fat in grams for a single serving as a numerical string, e.g., "12".'),
 });
 
 const GenerateRecipeOutputSchema = z.object({
@@ -39,6 +39,7 @@ const GenerateRecipeOutputSchema = z.object({
     thumbnail: z.string().describe('A URL for a placeholder thumbnail image for the dish.'),
     youtubeUrl: z.string().optional().describe('An optional URL to a YouTube video for the recipe.'),
     ingredients: z.array(IngredientSchema).describe('An array of ingredients with their measures.'),
+    servings: z.number().describe('The default number of servings this recipe makes (e.g., 2, 4).'),
     nutrition: NutritionSchema.describe('Estimated nutritional information for a single serving of the dish.'),
 });
 export type GenerateRecipeOutput = z.infer<typeof GenerateRecipeOutputSchema>;
@@ -68,7 +69,8 @@ const generateRecipePrompt = ai.definePrompt({
   - thumbnail: Provide a placeholder image URL from picsum.photos. e.g. https://picsum.photos/seed/random-seed-123/500/500
   - youtubeUrl: If possible, a relevant YouTube link. If not, omit this field.
   - ingredients: A list of objects, each with an "ingredient" and a "measure".
-  - nutrition: An object with estimated calories, protein, carbs, and fat for a single serving. Format these as strings with units (e.g., "350 kcal", "15g").
+  - servings: A reasonable default number of servings this recipe makes (e.g., 2 or 4).
+  - nutrition: An object with estimated calories, protein, carbs, and fat for a single serving. Format these as numerical strings without units.
 
   Ensure the recipe is practical for a home cook and the instructions are exceptionally easy to follow.
   `,
