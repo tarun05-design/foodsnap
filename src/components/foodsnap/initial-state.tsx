@@ -273,7 +273,6 @@ export default function InitialState({ formAction }: InitialStateProps) {
                   className="sr-only"
                   accept="image/png, image/jpeg, image/webp"
                   onChange={handleFileChange}
-                  required={true}
                 />
               </div>
               <div className="mt-6 flex justify-center">
@@ -299,7 +298,7 @@ export default function InitialState({ formAction }: InitialStateProps) {
                         )}
                     </div>
                     <canvas ref={canvasRef} className="hidden" />
-                    <Input ref={cameraInputRef} type="file" name="image" className="sr-only" required={true} />
+                    <Input ref={cameraInputRef} type="file" name="image" className="sr-only" />
 
                     <div className="flex w-full items-center justify-center gap-4">
                         <Button type="button" size="lg" onClick={takePicture} disabled={!hasCameraPermission || pending}>
@@ -321,3 +320,5 @@ export default function InitialState({ formAction }: InitialStateProps) {
     </Card>
   );
 }
+
+    
