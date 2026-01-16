@@ -11,6 +11,7 @@ import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 
 type InitialStateProps = {
   formAction: (payload: FormData) => void;
@@ -36,6 +37,7 @@ export default function InitialState({ formAction }: InitialStateProps) {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [activeDeviceId, setActiveDeviceId] = useState<string | undefined>(undefined);
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
   const { pending } = useFormStatus();
 
@@ -126,17 +128,36 @@ export default function InitialState({ formAction }: InitialStateProps) {
     }
   };
 
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
+  const processFile = (file: File) => {
+    if (file && file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      if (fileInputRef.current) {
+          fileInputRef.current.files = dataTransfer.files;
+      }
     } else {
-      setPreviewUrl(null);
+        setPreviewUrl(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        toast({
+            variant: "destructive",
+            title: "Invalid File Type",
+            description: "Please use a valid image file (PNG, JPG, or WEBP).",
+        });
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      processFile(file);
     }
   };
 
@@ -168,6 +189,32 @@ export default function InitialState({ formAction }: InitialStateProps) {
     }
   };
 
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragIn = (e: React.DragEvent) => {
+    handleDrag(e);
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragOut = (e: React.DragEvent) => {
+    handleDrag(e);
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    handleDrag(e);
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFile(e.dataTransfer.files[0]);
+      e.dataTransfer.clearData();
+    }
+  };
+
 
   return (
     <Card className="w-full animate-in fade-in-50 duration-500">
@@ -195,18 +242,25 @@ export default function InitialState({ formAction }: InitialStateProps) {
             </TabsList>
             <TabsContent value="upload">
               <div
-                className="group relative mt-4 cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center transition-colors hover:border-primary hover:bg-primary/5"
+                className={cn(
+                    "group relative mt-4 cursor-pointer rounded-lg border-2 border-dashed border-border p-4 text-center transition-colors hover:border-primary hover:bg-primary/5",
+                    isDragging && "border-primary bg-primary/10 ring-2 ring-primary"
+                )}
                 onClick={handleUploadCardClick}
+                onDragEnter={handleDragIn}
+                onDragLeave={handleDragOut}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
               >
-                <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
+                <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground pointer-events-none">
                   {previewUrl ? (
                     <div className="relative h-48 w-full max-w-sm">
                       <Image src={previewUrl} alt="Image preview" fill objectFit="contain" className="rounded-md" />
                     </div>
                   ) : (
                     <>
-                      <Camera className="h-12 w-12" />
-                      <p className="font-semibold text-foreground">Click to select your delicious dish</p>
+                      <Upload className="h-12 w-12" />
+                      <p className="font-semibold text-foreground">Click or drag & drop to upload</p>
                       <p className="text-xs">PNG, JPG, or WEBP supported</p>
                     </>
                   )}
